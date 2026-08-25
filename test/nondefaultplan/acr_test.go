@@ -45,6 +45,12 @@ func TestPlanACRStandard(t *testing.T) {
 			AttributeJsonPath: "{$.admin_enabled}",
 			Message:           "Unexpected ACR admin_enabled value",
 		},
+		"crAdminPasswordSensitiveTest": {
+			Expected:        "true",
+			Retriever:       helpers.RetrieveAfterSensitiveFromOutputChanges,
+			ResourceMapName: "cr_admin_password",
+			Message:         "cr_admin_password output must have AfterSensitive=true when admin is enabled",
+		},
 	}
 
 	plan := helpers.GetPlanFromCache(t, variables)

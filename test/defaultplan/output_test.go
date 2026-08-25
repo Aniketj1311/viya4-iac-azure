@@ -4,9 +4,10 @@
 package defaultplan
 
 import (
-	"github.com/stretchr/testify/assert"
 	"test/helpers"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // Test the Outputs section when using the sample-input-defaults.tfvars file.
@@ -42,4 +43,35 @@ func TestPlanOutputs(t *testing.T) {
 	}
 
 	helpers.RunTests(t, tests, helpers.GetDefaultPlan(t))
+}
+
+// TestPlanOutputSensitivityFlags verifies that all outputs declared with sensitive = true
+// have AfterSensitive set to true in the plan, ensuring secrets are never exposed in plan output.
+func TestPlanOutputSensitivityFlags(t *testing.T) {
+	t.Parallel()
+
+	sensitiveOutputs := []string{
+		"aks_host",
+		"kube_config",
+		"aks_cluster_node_username",
+		"aks_cluster_password",
+		"postgres_servers",
+		"cr_admin_password",
+	}
+
+	plan := helpers.GetDefaultPlan(t)
+
+	for _, outputName := range sensitiveOutputs {
+		outputName := outputName
+		t.Run(outputName, func(t *testing.T) {
+			t.Parallel()
+			tc := helpers.TestCase{
+				Expected:        "true",
+				Retriever:       helpers.RetrieveAfterSensitiveFromOutputChanges,
+				ResourceMapName: outputName,
+				Message:         outputName + " output must have AfterSensitive=true",
+			}
+			helpers.RunTest(t, tc, plan)
+		})
+	}
 }

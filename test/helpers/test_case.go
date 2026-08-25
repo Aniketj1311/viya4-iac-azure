@@ -46,7 +46,7 @@ func RetrieveFromRawPlan(plan *terraform.PlanStruct, outputName string, jsonPath
 	return value, nil
 }
 
-// RetrieveFromRawPlan Retriever that gets a value from the raw plan variables
+// RetrieveFromRawPlanOutputChanges Retriever that gets the After value from an output change
 func RetrieveFromRawPlanOutputChanges(plan *terraform.PlanStruct, outputName string, jsonPath string) (string, error) {
 	output, exists := plan.RawPlan.OutputChanges[outputName]
 	if !exists {
@@ -54,6 +54,15 @@ func RetrieveFromRawPlanOutputChanges(plan *terraform.PlanStruct, outputName str
 	}
 	value := fmt.Sprintf("%v", output.After)
 	return value, nil
+}
+
+// RetrieveAfterSensitiveFromOutputChanges retrieves the AfterSensitive flag from an output change.
+func RetrieveAfterSensitiveFromOutputChanges(plan *terraform.PlanStruct, outputName string, jsonPath string) (string, error) {
+	output, exists := plan.RawPlan.OutputChanges[outputName]
+	if !exists {
+		return "nil", nil
+	}
+	return fmt.Sprintf("%v", output.AfterSensitive), nil
 }
 
 // RetrieveFromResourcePlannedValuesMap Retriever that gets the value of a jsonpath query on a given *terraform.PlanStruct
